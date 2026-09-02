@@ -8,8 +8,15 @@ app = Flask(__name__)
 # Secret key for sessions
 app.secret_key = "datawise_secret_key_2026"
 
-# Database file
-DATABASE = "datawise.db"
+# ============================================================
+# DATABASE FILE
+# ============================================================
+# Use a fixed path relative to this app.py file.
+# This is safer when running on Render.
+DATABASE = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "datawise.db"
+)
 
 
 # ============================================================
@@ -71,6 +78,14 @@ def init_db():
 
 
 # ============================================================
+# IMPORTANT
+# INITIALIZE DATABASE WHEN APPLICATION STARTS
+# ============================================================
+
+init_db()
+
+
+# ============================================================
 # HOME PAGE
 # ============================================================
 
@@ -81,6 +96,8 @@ def index():
     session.clear()
 
     return render_template("index.html")
+
+
 # ============================================================
 # REGISTER
 # ============================================================
@@ -3666,6 +3683,7 @@ def logout():
 # ============================================================
 
 if __name__ == "__main__":
+
     app.run(
         debug=True,
         host="0.0.0.0",
