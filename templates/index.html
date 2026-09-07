@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>DataWise - Protect Your Privacy</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+
+        <div class="logo">
+            DATA<span>WISE</span>
+        </div>
+
+        <div class="nav-links">
+
+            <a href="{{ url_for('index') }}">Home</a>
+
+            {% if session.get("user_id") %}
+
+                {% if session.get("is_admin") %}
+                    <a href="{{ url_for('admin') }}">Admin Panel</a>
+                {% else %}
+                    <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                {% endif %}
+
+                <a href="{{ url_for('logout') }}"
+                   class="logout-btn">
+                    Logout
+                </a>
+
+            {% else %}
+
+                <a href="{{ url_for('login') }}">Login</a>
+
+                <a href="{{ url_for('register') }}"
+                   class="register-btn">
+                    Register
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    </nav>
+
+
+    <!-- FLASH MESSAGES -->
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+
+        {% if messages %}
+
+            <div class="messages">
+
+                {% for category, message in messages %}
+
+                    <div class="message {{ category }}">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+    {% endwith %}
+
+
+    <!-- HERO SECTION -->
+
+    <section class="hero">
+
+        <div class="hero-content">
+
+            <p class="small-title">
+                WELCOME TO DATAWISE
+            </p>
+
+            <h1>
+                Understand Your Data.
+                <br>
+                <span>Protect Your Privacy.</span>
+            </h1>
+
+            <p class="hero-text">
+                Learn how free apps work, what personal data they may
+                collect, and how you can make smarter privacy decisions.
+            </p>
+
+            <div class="hero-buttons">
+
+                {% if session.get("user_id") %}
+
+                    {% if session.get("is_admin") %}
+                        <a href="{{ url_for('admin') }}" class="primary-btn">
+                            Go to Admin Panel
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('dashboard') }}" class="primary-btn">
+                            Go to Dashboard
+                        </a>
+                    {% endif %}
+
+                {% else %}
+
+                    <a href="{{ url_for('register') }}"
+                       class="primary-btn">
+                        Get Started
+                    </a>
+
+                    <a href="{{ url_for('login') }}"
+                       class="secondary-btn">
+                        Login
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- INFORMATION SECTION -->
+
+    <section class="info-section">
+
+        <div class="section-heading">
+
+            <p class="small-title">
+                WHY DATAWISE?
+            </p>
+
+            <h2>
+                Your Data Has Value
+            </h2>
+
+            <p>
+                Many apps are free to download and use, but users should
+                understand what information an app may request and why.
+            </p>
+
+        </div>
+
+
+        <div class="cards">
+
+            <div class="card">
+
+                <div class="card-icon">
+                    🔐
+                </div>
+
+                <h3>
+                    Personal Data
+                </h3>
+
+                <p>
+                    Understand what personal information apps may collect
+                    and why it can be valuable.
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-icon">
+                    📱
+                </div>
+
+                <h3>
+                    App Permissions
+                </h3>
+
+                <p>
+                    Learn how to review permissions and avoid giving apps
+                    unnecessary access.
+                </p>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-icon">
+                    🛡️
+                </div>
+
+                <h3>
+                    Privacy Awareness
+                </h3>
+
+                <p>
+                    Build better privacy habits and make informed choices
+                    when using free applications.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- FOOTER -->
+
+    <footer>
+
+        <div class="logo">
+            DATA<span>WISE</span>
+        </div>
+
+        <p>
+            Understand Your Data. Protect Your Privacy.
+        </p>
+
+        <p class="copyright">
+            © 2026 DataWise | Field Project
+        </p>
+
+    </footer>
+
+
+</body>
+
+</html>

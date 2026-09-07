@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DataWise Admin</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="admin-body">
+<div class="admin-layout">
+
+<aside class="admin-sidebar">
+  <div>
+    <div class="admin-logo">DATA<span>WISE</span></div>
+    <div class="admin-label">ADMIN PANEL</div>
+    <nav class="admin-nav">
+      <a href="{{ url_for('admin') }}" class="{{ 'active' if page == 'dashboard' else '' }}">📊 <span>Dashboard</span></a>
+      <a href="{{ url_for('admin_users') }}" class="{{ 'active' if page == 'users' else '' }}">👥 <span>User Management</span></a>
+      <a href="{{ url_for('admin_activities') }}" class="{{ 'active' if page == 'activities' else '' }}">📋 <span>Activity Tracking</span></a>
+    </nav>
+  </div>
+  <div class="admin-sidebar-bottom">
+    <div class="admin-user">👤 <span>{{ session.get("username") }}</span></div>
+    <a href="{{ url_for('logout') }}" class="admin-logout">↪ Logout</a>
+  </div>
+</aside>
+
+<main class="admin-main">
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="messages admin-messages">
+    {% for category, message in messages %}<div class="message {{ category }}">{{ message }}</div>{% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+{% if page == "dashboard" %}
+  <div class="admin-header">
+    <p class="small-title">DATAWISE ADMIN</p>
+    <h1>Dashboard</h1>
+    <p>Monitor users, quiz activity and privacy awareness progress.</p>
+  </div>
+  <div class="admin-stat-grid">
+    <div class="admin-stat-card"><div class="stat-icon">👥</div><div><span>Total Users</span><strong>{{ total_users }}</strong></div></div>
+    <div class="admin-stat-card"><div class="stat-icon">📋</div><div><span>Total Quiz Attempts</span><strong>{{ total_attempts }}</strong></div></div>
+    <div class="admin-stat-card"><div class="stat-icon">✅</div><div><span>Completed Activities</span><strong>{{ completed_activities }}</strong></div></div>
+    <div class="admin-stat-card"><div class="stat-icon">⏳</div><div><span>Pending Users</span><strong>{{ pending_users }}</strong></div></div>
+    <div class="admin-stat-card"><div class="stat-icon">📊</div><div><span>Average Privacy Score</span><strong>{{ average_score }}%</strong></div></div>
+    <div class="admin-stat-card"><div class="stat-icon">🏆</div><div><span>Highest Score</span><strong>{{ highest_score }}%</strong></div></div>
+  </div>
+  <div class="admin-quick-grid">
+    <a href="{{ url_for('admin_users') }}" class="admin-quick-card"><span>👥</span><div><h3>Manage Users</h3><p>Search, filter and delete registered users.</p></div></a>
+    <a href="{{ url_for('admin_activities') }}" class="admin-quick-card"><span>📋</span><div><h3>Track Activities</h3><p>See which DataWise sections users have completed.</p></div></a>
+  </div>
+
+{% elif page == "users" %}
+  <div class="admin-header">
+    <p class="small-title">DATAWISE ADMIN</p>
+    <h1>User Management</h1>
+    <p>View username, registration date, privacy score and quiz status.</p>
+  </div>
+  <form class="admin-filters" method="GET">
+    <input type="search" name="search" value="{{ search }}" placeholder="Search username...">
+    <select name="status">
+      <option value="all" {{ 'selected' if status == 'all' else '' }}>All Users</option>
+      <option value="completed" {{ 'selected' if status == 'completed' else '' }}>Completed</option>
+      <option value="pending" {{ 'selected' if status == 'pending' else '' }}>Pending</option>
+    </select>
+    <button class="primary-btn" type="submit">Search / Filter</button>
+    <a href="{{ url_for('admin_users') }}" class="secondary-btn">Reset</a>
+  </form>
+  <div class="admin-table-card">
+    <div class="table-title">Registered Users ({{ users|length }})</div>
+    <div class="table-wrap"><table class="admin-table">
+      <thead><tr><th>Username</th><th>Registration Date</th><th>Privacy Score</th><th>Quiz Status</th><th>Action</th></tr></thead>
+      <tbody>
+      {% for user in users %}
+        <tr>
+          <td><strong>{{ user["username"] }}</strong></td><td>{{ user["created_at"] }}</td>
+          <td><span class="score-pill">{{ user["privacy_score"] }}%</span></td>
+          <td>{% if user["quiz_completed"] %}<span class="status completed">✓ Completed</span>{% else %}<span class="status pending">⏳ Pending</span>{% endif %}</td>
+          <td><form method="POST" action="{{ url_for('admin_delete_user', user_id=user['id']) }}" onsubmit="return confirm('Delete this user and their activity data?');"><button type="submit" class="delete-btn">Delete</button></form></td>
+        </tr>
+      {% else %}<tr><td colspan="5" class="empty-row">No users found.</td></tr>{% endfor %}
+      </tbody>
+    </table></div>
+  </div>
+
+{% elif page == "activities" %}
+  <div class="admin-header">
+    <p class="small-title">DATAWISE ADMIN</p>
+    <h1>Activity Tracking</h1>
+    <p>See which DataWise sections users have completed.</p>
+  </div>
+  <div class="activity-grid">
+    {% for activity in activities %}
+      <div class="activity-card"><div class="activity-card-icon">✓</div><div><h3>{{ activity["label"] }}</h3><p>{{ activity["completed"] }} user(s) completed this activity.</p></div></div>
+    {% endfor %}
+  </div>
+  <div class="admin-table-card">
+    <div class="table-title">User Activity Overview</div>
+    <div class="table-wrap"><table class="admin-table">
+      <thead><tr><th>Username</th><th>Privacy Score</th><th>Activities Completed</th><th>Progress</th></tr></thead>
+      <tbody>
+      {% for user in users %}
+        <tr><td><strong>{{ user["username"] }}</strong></td><td>{{ user["privacy_score"] }}%</td><td>{{ user["completed_count"] }} / 6</td>
+        <td><div class="mini-progress"><span style="width: {{ (user['completed_count'] / 6 * 100)|round }}%"></span></div></td></tr>
+      {% else %}<tr><td colspan="4" class="empty-row">No registered users yet.</td></tr>{% endfor %}
+      </tbody>
+    </table></div>
+  </div>
+{% endif %}
+</main>
+</div>
+</body>
+</html>
